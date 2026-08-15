@@ -389,7 +389,7 @@
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M12 3v3M9 6h6M12 6l7 5v10H5V11l7-5Z"></path><path d="M10 20v-5h4v5"></path></svg>
       <p class="card-label">Groom's ceremony</p>
       <p class="card-time">{{GIO_1}}</p>
-      <p class="card-venue">Lễ Thành Hôn tại tư gia nhà trai<br>12 Nguyễn Trãi, P. Bến Thành, Q.1, TP.HCM</p>
+      <p class="card-venue">{{VENUE_1}}</p>
       <div class="card-maps">
         <a class="btn-line" id="mapGroomGoogle" href="#" target="_blank" rel="noopener">Google Maps</a>
       </div>
@@ -398,7 +398,7 @@
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M12 3v3M9 6h6M12 6l7 5v10H5V11l7-5Z"></path><path d="M10 20v-5h4v5"></path></svg>
       <p class="card-label">Bride's ceremony</p>
       <p class="card-time">{{GIO_2}}</p>
-      <p class="card-venue">Lễ Vu Quy tại tư gia nhà gái<br>45 Lê Văn Sỹ, P.12, Q.3, TP.HCM</p>
+      <p class="card-venue">{{VENUE_2}}</p>
       <div class="card-maps">
         <a class="btn-line" id="mapBrideGoogle" href="#" target="_blank" rel="noopener">Google Maps</a>
       </div>
@@ -407,7 +407,7 @@
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="5" y="4" width="14" height="17"></rect><path d="M9 8h2M13 8h2M9 12h2M13 12h2M9 16h2M13 16h2"></path></svg>
       <p class="card-label">Reception</p>
       <p class="card-time">{{GIO_3}}</p>
-      <p class="card-venue">{{TEN_TIEC}}<br>123 Nguyễn Trãi, P. Bến Thành, Q.1, TP.HCM</p>
+      <p class="card-venue">{{VENUE_3}}</p>
       <div class="card-maps">
         <a class="btn-line" id="mapReceptionGoogle" href="#" target="_blank" rel="noopener">Google Maps</a>
       </div>
@@ -610,9 +610,9 @@
 
     // Map links
     var venues = {
-      groom: 'Tư gia nhà trai, {{DC_NHATRAI}}',
-      bride: 'Tư gia nhà gái, {{DC_NHAGAI}}',
-      reception: '{{TEN_TIEC}}, {{DC_TIEC}}'
+      groom: '{{V_GROOM}}',
+      bride: '{{V_BRIDE}}',
+      reception: '{{V_RECEPTION}}'
     };
     function gmaps(addr) { return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(addr); }
     document.getElementById('mapGroomGoogle').href = gmaps(venues.groom);

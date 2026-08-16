@@ -718,10 +718,9 @@
       this.reset();
     });
 
-    /* ---------- Dựng ảnh thiệp có mã QR (16/08/2026) ----------
-       Ve len canvas: anh cuoi (nhung san trong trang nen khong lam taint
-       canvas), dai trang o duoi, ten + ngay, ma QR lay tu api.qrserver.com
-       (co header CORS *) nen toDataURL van chay duoc. */
+    /* ---------- Dựng ảnh thiệp có mã QR (bố cục theo mẫu chị Linh 16/08/2026) ----------
+       Chu de THANG len anh, khong co dai trang o duoi. Dau & mau vang.
+       QR dat goc duoi TRAI, ben phai la loi cam on + chu ky. */
     (function () {
       var cv = document.getElementById('shareCanvas');
       if (!cv) return;
@@ -731,47 +730,119 @@
       var linkThiep = location.href.split('#')[0];
       var tenCap = ((document.querySelector('.hero-text h1') || {}).textContent || '').trim();
       var ngayCap = ((document.querySelector('.hero-date') || {}).textContent || '').trim();
+      var VANG = '#c9a86a';
+      var W = cv.width, H = cv.height;
 
-      function veChu(t, x, y, font, mau) {
-        ctx.font = font; ctx.fillStyle = mau; ctx.textAlign = 'center';
-        ctx.fillText(t, x, y);
+      var SERIF = 'Georgia, "Times New Roman", serif';
+      var SANS = '"Helvetica Neue", Helvetica, Arial, sans-serif';
+      var VIET = '"Snell Roundhand", "Apple Chancery", "Brush Script MT", Georgia, serif';
+
+      /* Canvas khong co letter-spacing o moi trinh duyet -> ve tung chu mot */
+      function beRong(t, gian) {
+        var w = 0;
+        for (var i = 0; i < t.length; i++) w += ctx.measureText(t[i]).width + (i ? gian : 0);
+        return w;
+      }
+      function veGian(t, giua, y, gian) {
+        var x = giua - beRong(t, gian) / 2;
+        for (var i = 0; i < t.length; i++) {
+          ctx.fillText(t[i], x, y);
+          x += ctx.measureText(t[i]).width + gian;
+        }
+      }
+      function dat(font, mau, alpha) {
+        ctx.font = font; ctx.fillStyle = mau;
+        ctx.globalAlpha = (alpha === undefined) ? 1 : alpha;
+        ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      }
+
+      /* Ten: "A & B" — chu trang, dau & mau vang */
+      function veTen(y, cao) {
+        var p = tenCap.split(/\s*&\s*/);
+        ctx.font = cao + 'px ' + SERIF;
+        if (p.length < 2) { dat(cao + 'px ' + SERIF, '#ffffff'); veGian(tenCap, W / 2, y, 2); return; }
+        var fA = ctx.measureText(p[0]).width, fB = ctx.measureText(p[1]).width;
+        ctx.font = 'italic ' + Math.round(cao * 0.72) + 'px ' + SERIF;
+        var fAmp = ctx.measureText('&').width;
+        var khe = cao * 0.42;
+        var tong = fA + khe + fAmp + khe + fB;
+        var x = (W - tong) / 2;
+        dat(cao + 'px ' + SERIF, '#ffffff');
+        ctx.fillText(p[0], x, y); x += fA + khe;
+        dat('italic ' + Math.round(cao * 0.72) + 'px ' + SERIF, VANG);
+        ctx.fillText('&', x, y); x += fAmp + khe;
+        dat(cao + 'px ' + SERIF, '#ffffff');
+        ctx.fillText(p[1], x, y);
       }
 
       function veNen(anh) {
-        var W = cv.width, H = cv.height, hAnh = 840;
-        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = '#141414'; ctx.fillRect(0, 0, W, H);
         if (anh) {
-          var ti = Math.max(W / anh.naturalWidth, hAnh / anh.naturalHeight);
+          var ti = Math.max(W / anh.naturalWidth, H / anh.naturalHeight);
           var w = anh.naturalWidth * ti, h = anh.naturalHeight * ti;
-          ctx.drawImage(anh, (W - w) / 2, (hAnh - h) / 2 * 0.6, w, h);
-        } else {
-          ctx.fillStyle = '#f4f4f4'; ctx.fillRect(0, 0, W, hAnh);
+          ctx.drawImage(anh, (W - w) / 2, (H - h) / 2, w, h);
         }
-        var g = ctx.createLinearGradient(0, hAnh - 220, 0, hAnh);
-        g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(1, '#ffffff');
-        ctx.fillStyle = g; ctx.fillRect(0, hAnh - 220, W, 220);
+        /* lop toi mo de chu noi tren moi anh */
+        var gt = ctx.createLinearGradient(0, 0, 0, H * 0.42);
+        gt.addColorStop(0, 'rgba(0,0,0,0.40)'); gt.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = gt; ctx.fillRect(0, 0, W, H * 0.42);
+        var gd = ctx.createLinearGradient(0, H * 0.52, 0, H);
+        gd.addColorStop(0, 'rgba(0,0,0,0)'); gd.addColorStop(1, 'rgba(0,0,0,0.62)');
+        ctx.fillStyle = gd; ctx.fillRect(0, H * 0.52, W, H * 0.48);
 
-        veChu(tenCap, W / 2, hAnh + 64, '400 54px Georgia, serif', '#0e0e0e');
-        veChu(ngayCap, W / 2, hAnh + 112, '400 25px Georgia, serif', '#6b6b6b');
-        veChu('NUPAKACHI WEDDING  ·  DOLINHANH BRIDAL', W / 2, H - 38,
-              '500 17px Helvetica, Arial, sans-serif', '#9a9a9a');
+        /* --- khoi tren --- */
+        dat('500 21px ' + SANS, '#ffffff', 0.92);
+        veGian("WE'RE GETTING MARRIED", W / 2, 92, 7);
+
+        veTen(300, 96);
+
+        ctx.globalAlpha = 1;
+        dat('400 22px ' + SANS, '#ffffff', 0.9);
+        veGian(ngayCap.toUpperCase(), W / 2, 356, 8);
+
+        dat('italic 46px ' + VIET, VANG, 0.95);
+        veGian('Save our date', W / 2, 424, 1);
+
+        ctx.globalAlpha = 1;
       }
 
-      function veQR(cb) {
-        var qr = new Image();
-        qr.crossOrigin = 'anonymous';
-        qr.onload = function () {
-          var kt = 236, x = (cv.width - kt) / 2, y = 840 + 150;
+      function veCuoi(qr) {
+        var le = 78, qrKt = 282, qrY = H - 236 - qrKt;
+
+        /* nhan tren QR */
+        dat('500 19px ' + SANS, '#ffffff', 0.92);
+        ctx.textAlign = 'left';
+        ctx.fillText('QUÉT MÃ ĐỂ XEM', le, qrY - 44);
+        ctx.fillText('THIỆP CƯỚI ONLINE', le, qrY - 18);
+
+        ctx.globalAlpha = 1;
+        if (qr) {
           ctx.fillStyle = '#ffffff';
-          ctx.fillRect(x - 16, y - 16, kt + 32, kt + 32);
-          ctx.strokeStyle = '#dcdcdc'; ctx.lineWidth = 1;
-          ctx.strokeRect(x - 16.5, y - 16.5, kt + 33, kt + 33);
-          ctx.drawImage(qr, x, y, kt, kt);
-          cb(true);
-        };
-        qr.onerror = function () { cb(false); };
-        qr.src = 'https://api.qrserver.com/v1/create-qr-code/?margin=0&size=500x500&data='
-               + encodeURIComponent(linkThiep);
+          ctx.fillRect(le, qrY, qrKt, qrKt);
+          ctx.drawImage(qr, le + 26, qrY + 26, qrKt - 52, qrKt - 52);
+        }
+
+        /* loi cam on ben phai QR */
+        var xp = le + qrKt + 54;
+        dat('500 20px ' + SANS, '#ffffff', 0.92);
+        ctx.fillText('THANK YOU FOR BEING A PART', xp, qrY + 84);
+        ctx.fillText('OF OUR SPECIAL DAY!', xp, qrY + 114);
+
+        dat('italic 26px ' + SERIF, '#ffffff', 0.9);
+        ctx.fillText('with love,', xp, qrY + 172);
+
+        dat('italic 40px ' + VIET, VANG, 0.95);
+        ctx.fillText(tenCap, xp, qrY + 226);
+
+        /* duong ke vang + credit */
+        ctx.globalAlpha = 0.5; ctx.strokeStyle = VANG; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(le, H - 108); ctx.lineTo(W - le, H - 108); ctx.stroke();
+
+        dat('500 19px ' + SANS, '#ffffff', 0.88);
+        ctx.textAlign = 'left';
+        veGian('DESIGNED BY NUPAKACHI WEDDING', W / 2, H - 60, 6);
+        ctx.globalAlpha = 1;
       }
 
       function xong(coQR) {
@@ -790,7 +861,12 @@
       var anhBia = document.querySelector('.hero-photo');
       function batDau() {
         veNen(anhBia && anhBia.naturalWidth ? anhBia : null);
-        veQR(xong);
+        var qr = new Image();
+        qr.crossOrigin = 'anonymous';
+        qr.onload = function () { veCuoi(qr); xong(true); };
+        qr.onerror = function () { veCuoi(null); xong(false); };
+        qr.src = 'https://api.qrserver.com/v1/create-qr-code/?margin=0&size=600x600&data='
+               + encodeURIComponent(linkThiep);
       }
       if (anhBia && !anhBia.complete) {
         anhBia.addEventListener('load', batDau);

@@ -328,6 +328,16 @@
     .rep-tile img { transition: none; }
     html { scroll-behavior: auto; }
   }
+  /* Link Instagram cuoi thiep (chi Linh yeu cau 16/08/2026) — chu nho, mo,
+     cung kieu voi dong credit, khong duoc noi bat hon ten cap doi. */
+  footer.thanks .ig { margin-top: 10px; font-size: 0.66rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--charcoal-soft); }
+  footer.thanks .ig a { color: inherit; text-decoration: none;
+    border-bottom: 1px solid var(--line); padding-bottom: 1px; }
+  footer.thanks .ig a:hover { color: var(--charcoal); }
+  footer.thanks .ig-dot { margin: 0 8px; opacity: 0.5; }
+
+
 </style>
 
 <div class="progress-bar" id="progressBar"></div>
@@ -496,6 +506,9 @@
   <p style="font-family:var(--serif);font-style:italic;font-size:1.1rem;color:var(--charcoal-soft);margin-top:18px">{{NGAY}}</p>
   <p class="credit">Wedding Invitation by Nupakachi Wedding &amp; Dolinhanh Bridal</p>
   <p class="gift">A design gift for our couples</p>
+  <p class="ig"><a href="https://www.instagram.com/nupakachiweddingfilm/" target="_blank" rel="noopener">@nupakachiweddingfilm</a>
+    <span class="ig-dot">·</span>
+    <a href="https://www.instagram.com/dolinhanh.bridal/" target="_blank" rel="noopener">@dolinhanh.bridal</a></p>
 </footer>
 
 <div class="lightbox" id="lightbox">

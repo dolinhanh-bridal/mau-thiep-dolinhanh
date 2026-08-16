@@ -342,6 +342,19 @@
   footer.thanks .ig-dot { margin: 0 8px; opacity: 0.5; }
 
 
+
+  /* ---------- ẢNH THIỆP QR ĐỂ GỬI BẠN BÈ (16/08/2026) ----------
+     Cô dâu chú rể bấm nút, trình duyệt tự ghép ảnh cưới + mã QR thành một
+     tấm ảnh dọc rồi tải về. Gửi Zalo/Messenger tiện hơn gửi link trần. */
+  .share-card { text-align: center; }
+  .share-preview {
+    max-width: 300px; width: 100%; margin: 0 auto 22px;
+    border: 1px solid var(--line); background: var(--beige);
+    display: block;
+  }
+  .share-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .share-note { font-size: 0.8rem; color: var(--charcoal-soft); margin-top: 14px; max-width: 42ch;
+    margin-left: auto; margin-right: auto; line-height: 1.6; }
 </style>
 
 <div class="progress-bar" id="progressBar"></div>
@@ -499,6 +512,20 @@
         <a class="btn-line ghost" id="successMapLink" href="#" target="_blank" rel="noopener">📍 Open Google Maps</a>
       </div>
     </div>
+  </div>
+</section>
+
+<section class="share" id="share" data-reveal>
+  <p class="eyebrow center">Gửi cho khách mời</p>
+  <p class="section-lede">Anh chị tải tấm ảnh này về rồi gửi qua Zalo, Facebook hay in ra đều được.
+    Khách quét mã là mở được thiệp, không phải gõ link.</p>
+  <div class="share-card">
+    <canvas id="shareCanvas" class="share-preview" width="1080" height="1350"></canvas>
+    <div class="share-actions">
+      <a class="btn-line" id="btnTaiAnh" download="thiep-cuoi.png" href="#">Tải ảnh thiệp</a>
+      <button class="btn-line ghost" type="button" id="btnChepLink">Sao chép link thiệp</button>
+    </div>
+    <p class="share-note" id="shareNote">Đang dựng ảnh…</p>
   </div>
 </section>
 
@@ -690,6 +717,96 @@
       document.getElementById('rsvpSuccess').hidden = false;
       this.reset();
     });
+
+    /* ---------- Dựng ảnh thiệp có mã QR (16/08/2026) ----------
+       Ve len canvas: anh cuoi (nhung san trong trang nen khong lam taint
+       canvas), dai trang o duoi, ten + ngay, ma QR lay tu api.qrserver.com
+       (co header CORS *) nen toDataURL van chay duoc. */
+    (function () {
+      var cv = document.getElementById('shareCanvas');
+      if (!cv) return;
+      var ctx = cv.getContext('2d');
+      var note = document.getElementById('shareNote');
+      var nutTai = document.getElementById('btnTaiAnh');
+      var linkThiep = location.href.split('#')[0];
+      var tenCap = ((document.querySelector('.hero-text h1') || {}).textContent || '').trim();
+      var ngayCap = ((document.querySelector('.hero-date') || {}).textContent || '').trim();
+
+      function veChu(t, x, y, font, mau) {
+        ctx.font = font; ctx.fillStyle = mau; ctx.textAlign = 'center';
+        ctx.fillText(t, x, y);
+      }
+
+      function veNen(anh) {
+        var W = cv.width, H = cv.height, hAnh = 840;
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+        if (anh) {
+          var ti = Math.max(W / anh.naturalWidth, hAnh / anh.naturalHeight);
+          var w = anh.naturalWidth * ti, h = anh.naturalHeight * ti;
+          ctx.drawImage(anh, (W - w) / 2, (hAnh - h) / 2 * 0.6, w, h);
+        } else {
+          ctx.fillStyle = '#f4f4f4'; ctx.fillRect(0, 0, W, hAnh);
+        }
+        var g = ctx.createLinearGradient(0, hAnh - 220, 0, hAnh);
+        g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(1, '#ffffff');
+        ctx.fillStyle = g; ctx.fillRect(0, hAnh - 220, W, 220);
+
+        veChu(tenCap, W / 2, hAnh + 64, '400 54px Georgia, serif', '#0e0e0e');
+        veChu(ngayCap, W / 2, hAnh + 112, '400 25px Georgia, serif', '#6b6b6b');
+        veChu('NUPAKACHI WEDDING  ·  DOLINHANH BRIDAL', W / 2, H - 38,
+              '500 17px Helvetica, Arial, sans-serif', '#9a9a9a');
+      }
+
+      function veQR(cb) {
+        var qr = new Image();
+        qr.crossOrigin = 'anonymous';
+        qr.onload = function () {
+          var kt = 236, x = (cv.width - kt) / 2, y = 840 + 150;
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(x - 16, y - 16, kt + 32, kt + 32);
+          ctx.strokeStyle = '#dcdcdc'; ctx.lineWidth = 1;
+          ctx.strokeRect(x - 16.5, y - 16.5, kt + 33, kt + 33);
+          ctx.drawImage(qr, x, y, kt, kt);
+          cb(true);
+        };
+        qr.onerror = function () { cb(false); };
+        qr.src = 'https://api.qrserver.com/v1/create-qr-code/?margin=0&size=500x500&data='
+               + encodeURIComponent(linkThiep);
+      }
+
+      function xong(coQR) {
+        try {
+          nutTai.href = cv.toDataURL('image/png');
+          var ten = tenCap.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+          nutTai.setAttribute('download', 'thiep-cuoi' + (ten ? '-' + ten : '') + '.png');
+          note.textContent = coQR
+            ? 'Bấm “Tải ảnh thiệp” để lưu về máy. Trên điện thoại thì bấm giữ vào ảnh rồi chọn Lưu ảnh.'
+            : 'Đã dựng ảnh nhưng chưa tải được mã QR. Anh chị gửi kèm link cho khách giúp em ạ.';
+        } catch (e) {
+          note.textContent = 'Trình duyệt này không cho lưu ảnh. Anh chị bấm giữ vào ảnh rồi chọn Lưu ảnh, hoặc chụp màn hình ạ.';
+        }
+      }
+
+      var anhBia = document.querySelector('.hero-photo');
+      function batDau() {
+        veNen(anhBia && anhBia.naturalWidth ? anhBia : null);
+        veQR(xong);
+      }
+      if (anhBia && !anhBia.complete) {
+        anhBia.addEventListener('load', batDau);
+        anhBia.addEventListener('error', batDau);
+      } else { batDau(); }
+
+      var nutChep = document.getElementById('btnChepLink');
+      if (nutChep) {
+        nutChep.addEventListener('click', function () {
+          navigator.clipboard.writeText(linkThiep).then(function () {
+            nutChep.textContent = 'Đã sao chép link';
+            setTimeout(function () { nutChep.textContent = 'Sao chép link thiệp'; }, 2000);
+          });
+        });
+      }
+    })();
 
     // Lightbox
     var galleries = {

@@ -772,6 +772,7 @@
         var fAmp = ctx.measureText('&').width;
         var khe = cao * 0.42;
         var tong = fA + khe + fAmp + khe + fB;
+        if (tong > W - 120) return veTen(y, Math.floor(cao * (W - 120) / tong)); /* ten dai tu thu nho, khong bi cat (25/11/2026) */
         var x = (W - tong) / 2;
         dat(cao + 'px ' + SERIF, '#ffffff');
         ctx.fillText(p[0], x, y); x += fA + khe;
